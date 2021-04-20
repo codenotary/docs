@@ -91,6 +91,8 @@ docker run -it -d -p 3322:3322 -p 9497:9497 -v immudb-data:/var/lib/immudb --nam
 ./immudb -d
 ```
 
+To stop immudb, find the process `ps -ax | grep immudb` and then `kill -15 <pid>`. Alternatively, the Windows PowerShell commands are `Get-Process immudb* | Stop-Process`.
+
 ## Configuration
 
 immudb can be configured using environment variables, flags or a config file.

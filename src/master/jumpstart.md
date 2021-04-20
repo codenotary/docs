@@ -1,4 +1,4 @@
-# Developer Jumpstart for immudb
+# Developer Jumpstart for immudb SDKs
 [![Slack](https://img.shields.io/badge/join%20slack-%23immutability-brightgreen.svg)](https://slack.vchain.us/) [![Discuss at immudb@googlegroups.com](https://img.shields.io/badge/discuss-immudb%40googlegroups.com-blue.svg)](https://groups.google.com/group/immudb) [![License](https://img.shields.io/github/license/codenotary/immudb4j)](https://github.com/codenotary/immudb/blob/master/LICENSE)
 
 ## Introduction
@@ -6,46 +6,27 @@ This guide helps developers quickly start with CodeNotary's immudb database and 
 
 Note: If you're using another development language, please read up on our [immugw](https://docs.immudb.io/master/immugw/) option.
 
-This section is not yet ready for immudb 0.9. We are working on it in order to improve it and we are close to deliver. Stay tuned!
+## Getting immudb running
 
-### Get the Docker Image
+You may download the immudb binary from [the latest releases on Github](https://github.com/codenotary/immudb/releases/latest). Once you have downloaded immudb, rename it to `immudb`, make sure to mark it as executable, then run it. The following example shows how to obtain v0.9.2 for linux amd64:
 
-1. Pull the immudb Docker Image from [Docker Hub](https://hub.docker.com/r/codenotary/immudb). Below are the commands when using a Linux shell.
+```bash
+wget https://github.com/vchain-us/immudb/releases/download/v0.9.2/immudb-v0.9.2-linux-amd64
+mv immudb-v0.9.2-linux-amd64 immudb
+chmod +x immudb
 
-	```bash
-	docker pull codenotary/immudb:latest
-	```
+# run immudb in the foreground to see all output
+./immudb
 
-2. You can run immudb in a container using the code that follows.
+# or run immudb in the background
+./immudb -d
+```
 
-	```bash
-	docker run -it -d -p 3322:3322 -p 9497:9497 --name immudb codenotary/immudb:latest
-	```
+Alternatively, you may use Docker to run immudb in a ready-to-use container:
 
-3. Your immudb should now be up and running. Check your container logs to verify this.
-
-	```bash
-	docker logs immudb
-	```
-4. Skip down to the section about [Creating an immudb client instance in your chosen programming language](#creating-an-immudb-client-instance-in-your-chosen-programming-language).
-
-
-### Download the installer for the latest release
-
-1. Download the latest release from our [GitHub](https://github.com/codenotary/immudb/releases).
-
-2. Run immudb. Linux shell commands are shown below.
-
-	```bash
-	./immudb       # Runs immudb in the foreground
-	./immudb -d    # Runs immudb in the background
-	```
-	- immudb also runs as a service which is explained in this [Readme](https://github.com/codenotary/immudb) to use this method).
-
-3. To stop immudb, find the process `ps -ax | grep immudb` and then `kill -15 <pid>`. Alternatively, the Windows PowerShell commands are `Get-Process immudb* | Stop-Process`.
-
-4. Continue with the section that follows.
-
+```bash
+docker run -d --net host -it --rm --name immudb codenotary/immudb:latest
+```
 
 ## Creating an immudb client
 
@@ -160,7 +141,7 @@ If you're using another language, then read up on our [immugw](https://docs.immu
 
 ### Connection and authentication
 
-Immudb run on 3323 default port. Here we connecting a client with default options and
+Immudb run on 3322 default port. Here we connecting a client with default options and
 authenticating using default username and password.
 It's possible to modify defaults on immudb server config folder inside `immudb.toml`
 :::: tabs
