@@ -1,12 +1,22 @@
 # How it works
 
-Download [immudb short research paper](https://codenotary.com/technologies/immudb/) to have a conceptual understanding of the technical foundations of immudb.
+Download [immudb short research paper](https://codenotary.com/technologies/immudb/) to get a conceptual understanding of the technical foundations of immudb.
 
-This section is not yet ready for immudb 0.9. We are working on it in order to improve it and we are close to deliver. Stay tuned!
+The SDK ```client``` object offers a simple set of methods for reading and writing ledger entries, along with several utility functions. Users have the option to include data validation as part of each transaction. 
+
+Before getting into code samples, you may find it beneficial to review the following high-level introduction to SDK functions. 
 
 ## Adding data
 
-This section is not yet ready for immudb 0.9. We are working on it in order to improve it and we are close to deliver. Stay tuned!
+The _Set_ method of the client object is used to add new entries to the ledger. Two variations are available:
+- ```Set``` Adds a key-value pair to the ledger.
+- ```VerifiedSet``` Adds a key-value pair to the ledger and verify automatically.
+
+## Fetching data
+
+The _Get_ method of the client object is used to read entries from the ledger. Two variations are available:
+- ```Get``` Reads a value from the ledger without verification.
+- ```VerifiedGet``` Reads a value from the ledger and verify automatically.
 
 ## Checking data consistency
 
@@ -44,19 +54,23 @@ immuclient audit-mode --audit-username {immudb-username} --audit-password {immud
 
 ## Item References
 
-Enables the insertion of a special entry which references to another item.
+Item references enable the insertion of a special entry which references another existing item. 
+
+A typical use case is an account balance. While a conventional banking application might update an account record as the balance changes, there's no such thing as updating an immutable database. Since you can only add new records with immudb, you may want to tie together entries that represent a new value for an entity that's part of a previous entry, such as an account balance.
+
+immudb provides methods that then let you query all entries associated with a particular reference entity.
 
 ## Primary Index
 
-Index enables queries and search based on the data key.
+The primary index enables queries and search based on the **data key**.
 
 ## Secondary Index
 
-Index enables queries and search based on the data value.
+The secondary index enables queries and search based on the **data value**.
 
 ## Cryptographic signatures
 
-A signature (PKI) provided by the client can be became part of the insertion process.
+A signature (PKI) provided by the client can be become part of the insertion process.
 
 ## Authentication (transport)
 
