@@ -18,46 +18,50 @@
 ### Creating tables
 
 ```
-CREATE TABLE table1 (id INTEGER, PRIMARY KEY id);
-CREATE TABLE table1 (id INTEGER, ts INTEGER, title VARCHAR, active BOOLEAN, payload BLOB, PRIMARY KEY id);
-CREATE TABLE IF NOT EXISTS table1 (id INTEGER, PRIMARY KEY id);
+CREATE TABLE IF NOT EXISTS customers (id INTEGER, customer_name VARCHAR, email VARCHAR, address VARCHAR, city VARCHAR, ip VARCHAR, country VARCHAR, age INTEGER, active BOOLEAN, PRIMARY KEY id);
+CREATE TABLE IF NOT EXISTS products (id INTEGER, product VARCHAR, price VARCHAR, PRIMARY KEY id);
+CREATE TABLE IF NOT EXISTS orders (id INTEGER, customerid INTEGER, productid INTEGER, PRIMARY KEY id);
 ```
 
 ### Indexes
 
 ```
-CREATE INDEX ON table1(name);
+CREATE INDEX ON customers(customer_name);
 ```
 
 ### Inserting or updating data
 
 ```
-INSERT INTO table1 (id, title) VALUES (1, 'some title')
+INSERT INTO customers (id, customer_name, email, address, city, ip, country, age, active) values (1, 'Isidro Behnen', 'ibehnen0@mail.ru', 'ibehnen0@chronoengine.com', 'Arvika', '2.124.67.107', 'SE', 24, true);
+INSERT INTO products (id, product, price) values (1, 'Juice - V8, Tomato', '$4.04');
 ```
 
 `UPSERT` will update the value if a row with the same primary key already exists:
 
 ```
-UPSERT INTO table1 (id, title) VALUES (1, 'some title')
-UPSERT INTO table1 (id, ts, title, active, payload) VALUES (2, NOW(), 'title', true, x'a blob')
+UPSERT INTO customers (id, customer_name, email, address, city, ip, country, age, active) values (1, 'Isidro Behnen', 'ibehnen0@mail.ru', 'ibehnen0@chronoengine.com', 'Arvika', '2.124.67.108', 'SE', 24, true);
+UPSERT INTO customers (id, customer_name, email, address, city, ip, country) values (2, 'Claudianus Boldt', 'cboldt1@adobe.com', 'cboldt1@elpais.com', 'Kimhae', '125.89.31.130', 'KR');
+UPSERT INTO products (id, product, price) values (2, 'Grapes - Red', '$5.03');
+UPSERT INTO orders (id, customerID, productID) values (1, 1, 2);
 ```
 
 ### Querying
 
 ```
-SELECT id, title FROM db1.table1 AS t1
-SELECT t1.id, title FROM (db1.table1 AS t1)
-SELECT id, time, name FROM table1 WHERE country = 'US' AND time <= NOW() AND name = @pname
-SELECT id, title, year FROM table1 ORDER BY title ASC, year DESC
-SELECT id, name, table2.status FROM table1 INNER JOIN table2 ON table1.id = table2.id WHERE name = 'John' ORDER BY name DESC
-SELECT country, SUM(amount) FROM table1 GROUP BY country
-SELECT id FROM table1 WHERE (id > 0 AND NOT table1.id >= 10) OR table1.title LIKE 'J.*'
+SELECT id, customer_name, ip FROM customers;
+SELECT id, customer_name, email FROM customers WHERE country = 'SE' AND city = 'Arvika';
+SELECT id, customer_name FROM customers ORDER BY customer_name ASC;
+SELECT COUNT() FROM orders INNER JOIN customers ON orders.productid = customers.id;
+SELECT COUNT() FROM orders INNER JOIN customers ON orders.productid = customers.id WHERE orders.productid = 2;
+SELECT * FROM customers GROUP BY country;
+SELECT product FROM products WHERE product LIKE 'J';
+SELECT id, product FROM products WHERE (id > 0 AND NOT products.id >= 10) AND (products.product LIKE 'J');
 ```
 
 ### Parameters
 
 ```
-SELECT t.id as d FROM (people AS t) WHERE id <= 3 AND active = @active
+SELECT c.id, c.customer_name AS name, active FROM (customers AS c) WHERE id <= 3 AND active = true;
 ```
 
 ### Aggregations
@@ -73,20 +77,47 @@ SELECT t.id as d FROM (people AS t) WHERE id <= 3 AND active = @active
 </CustomList>
 
 ```
-SELECT COUNT() AS c, SUM(age), MIN(age), MAX(age), AVG(age) FROM table1 AS t1
-SELECT active, COUNT() as c, MIN(age), MAX(age) FROM table1 GROUP BY active HAVING COUNT() > 0 ORDER BY active DESC
+SELECT COUNT() AS c, SUM(age), MIN(age), MAX(age), AVG(age) FROM customers;
+SELECT active, COUNT() as c, MIN(age), MAX(age) FROM customers GROUP BY active HAVING COUNT() > 0 ORDER BY active DESC;
+SELECT active, COUNT() as c, MIN(age), MAX(age) FROM customers GROUP BY active HAVING COUNT() > 0 ORDER BY customer_name DESC;
 ```
 
 ### Transactions
 
 ```
-BEGIN TRANSACTION; UPSERT INTO table1 (id, label) VALUES (100, 'label1'); UPSERT INTO table2 (id) VALUES (10) COMMIT;
+BEGIN TRANSACTION; UPSERT INTO customers (id, age) VALUES (1, 25); UPSERT INTO products (id, price) VALUES (2, '$5.76'); COMMIT;
 ```
 
-###  Time travel
+### Time travel
+
+Time travel could be achieved in two ways 
+
+##### by adding the 'BEFORE TX <TX_ID>' within the table name
 
 ```
-USE SNAPSHOT BEFORE TX 1000
+# latest data
+SELECT id, customer_name, ip as name FROM customers;
+
+# past data
+SELECT id, customer_name, ip FROM (customers BEFORE TX 5);
+```
+
+##### or using the 'USE SNAPSHOT BEFORE TX <TX_ID>' command that will influence all the following commands
+
+```
+# latest data
+SELECT id, customer_name as name FROM customers;
+
+# past data
+USE SNAPSHOT BEFORE TX 5;
+SELECT id, customer_name, ip FROM customers;
+```
+
+After using the 'USE SNAPSHOT BEFORE TX <TX_ID>' command,
+it's then possible to reset to the latest with
+
+```
+USE SNAPSHOT BEFORE TX <LATEST_TX_ID>;
 ```
 
 </WrappedSection>
